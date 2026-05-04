@@ -10,6 +10,7 @@ export function makeGenerateCommand(): Command {
   cmd.option("-m, --model <model>", "Modelo Groq a usar", "llama-3.3-70b-versatile");
   cmd.option("-t, --max-tokens <number>", "Máximo de tokens en respuesta", "300");
   cmd.option("--temperature <number>", "Temperatura del modelo (0-1)", "0.3");
+  cmd.option("--hook", "Modo hook: escribe en archivo de mensaje en lugar de stdout", false);
 
   cmd.action(async (opts) => {
     const env = loadEnv();
@@ -37,14 +38,26 @@ export function makeGenerateCommand(): Command {
       });
 
       const parsed = parseCommitMessage(raw);
+      const message = [parsed.title, "", ...parsed.body].join("\n") + "\n";
 
-      console.log();
-      console.log(chalk.green("Mensaje de commit generado:"));
-      console.log();
-      console.log(chalk.bold(parsed.title));
-      if (parsed.body.length > 0) {
+      if (opts.hook) {
+        const argvIdx = process.argv.findIndex((a) => a === "--hook");
+        const msgFile = argvIdx !== -1 ? process.argv[argvIdx + 1] : null;
+        if (msgFile && !msgFile.startsWith("-")) {
+          const fs = await import("fs");
+          fs.writeFileSync(msgFile, message);
+        } else {
+          console.log(message);
+        }
+      } else {
         console.log();
-        parsed.body.forEach((line) => console.log(`  ${line}`));
+        console.log(chalk.green("Mensaje de commit generado:"));
+        console.log();
+        console.log(chalk.bold(parsed.title));
+        if (parsed.body.length > 0) {
+          console.log();
+          parsed.body.forEach((line) => console.log(`  ${line}`));
+        }
       }
     } catch (error) {
       console.error(chalk.red("Error al generar el mensaje:"), error instanceof Error ? error.message : error);

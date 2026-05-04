@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Command } from "commander";
 import { makeGenerateCommand } from "./commands/generate";
 import { makeHookCommand } from "./commands/hook";
@@ -8,7 +9,7 @@ const program = new Command();
 program
   .name("gitmate")
   .description("Generador de mensajes de commit con IA usando Groq")
-  .version("0.1.0");
+  .version("0.2.0");
 
 program.addCommand(makeGenerateCommand());
 program.addCommand(makeHookCommand());

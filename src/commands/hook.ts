@@ -6,7 +6,7 @@ import * as path from "path";
 
 const HOOKS_DIR = path.join(__dirname, "../../hooks");
 const HOOK_CONTENT = `#!/bin/sh
-node "$(dirname "$0")/../dist/cli.js" generate --hook
+node "$(dirname "$0")/../dist/cli.js" generate --hook "$1"
 `;
 
 export function makeHookCommand(): Command {
